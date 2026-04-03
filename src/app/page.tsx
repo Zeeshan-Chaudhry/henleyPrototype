@@ -50,35 +50,80 @@ export default function Home() {
     }
   }, [started, isLoading]);
 
+  const streamResponse = async (
+    apiMessages: Message[],
+    beforeMessages: Message[]
+  ) => {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ messages: apiMessages }),
+    });
+
+    if (!res.ok || !res.body) throw new Error("Stream failed");
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let streamedText = "";
+    let buffer = "";
+
+    setMessages([...beforeMessages, { role: "assistant", content: "" }]);
+    setIsLoading(false);
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const json = JSON.parse(line.slice(6));
+
+        if (json.type === "delta") {
+          streamedText += json.text;
+          const display = streamedText
+            .replace(/```json:lead_data[\s\S]*$/, "")
+            .trim();
+          setMessages([
+            ...beforeMessages,
+            { role: "assistant", content: display },
+          ]);
+        } else if (json.type === "done") {
+          const finalText = json.displayText || streamedText;
+          setMessages([
+            ...beforeMessages,
+            { role: "assistant", content: finalText },
+          ]);
+          if (json.leadData) {
+            setLeadData(json.leadData);
+          }
+        }
+      }
+    }
+  };
+
   const startConversation = async () => {
     setStarted(true);
     setIsLoading(true);
 
-    try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [{ role: "user", content: "Hi" }],
-        }),
-      });
+    const initial: Message[] = [{ role: "user", content: "Hi" }];
 
-      const data = await res.json();
-      setMessages([
-        { role: "user", content: "Hi" },
-        { role: "assistant", content: data.message },
-      ]);
+    try {
+      await streamResponse(initial, initial);
     } catch {
       setMessages([
-        { role: "user", content: "Hi" },
+        ...initial,
         {
           role: "assistant",
           content:
-            "Hey! Thanks for reaching out to Henley Contracting. I'd love to help get you started. What's your name?",
+            "Hey! Thanks for reaching out to Henley Contracting. What's your name?",
         },
       ]);
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   const sendMessage = async () => {
@@ -94,32 +139,7 @@ export default function Home() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
-      });
-
-      const data = await res.json();
-
-      if (data.error) {
-        setMessages([
-          ...newMessages,
-          {
-            role: "assistant",
-            content: "Sorry, something went wrong. Can you try again?",
-          },
-        ]);
-      } else {
-        setMessages([
-          ...newMessages,
-          { role: "assistant", content: data.message },
-        ]);
-
-        if (data.leadData) {
-          setLeadData(data.leadData);
-        }
-      }
+      await streamResponse(newMessages, newMessages);
     } catch {
       setMessages([
         ...newMessages,
@@ -128,9 +148,8 @@ export default function Home() {
           content: "Sorry, something went wrong. Can you try again?",
         },
       ]);
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -148,77 +167,133 @@ export default function Home() {
     setIsLoading(false);
   };
 
+  // ─── Landing Page ───
   if (!started) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-gray-50 to-gray-100 px-4">
-        <div className="max-w-2xl text-center">
-          <div className="mb-6">
-            <div className="w-16 h-16 bg-[#E87722] rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white text-2xl font-bold">H</span>
+      <div className="min-h-screen bg-[#0f1117] text-white overflow-hidden relative">
+        {/* Floating gradient orbs */}
+        <div className="orb-1 absolute top-[-200px] left-[-100px] w-[500px] h-[500px] bg-[#E87722]/20 rounded-full blur-[120px]" />
+        <div className="orb-2 absolute bottom-[-200px] right-[-100px] w-[400px] h-[400px] bg-[#E87722]/10 rounded-full blur-[100px]" />
+
+        {/* Nav */}
+        <nav className="nav-animate relative z-10 flex items-center justify-between px-8 py-6 max-w-6xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-[#E87722] rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">H</span>
             </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <span className="font-semibold text-lg tracking-tight">
               Henley Contracting
-            </h1>
-            <p className="text-lg text-gray-500">
-              AI Lead Intake System
-            </p>
+            </span>
           </div>
+          <span className="text-xs text-gray-500 bg-white/5 border border-white/10 rounded-full px-3 py-1">
+            Prototype Demo
+          </span>
+        </nav>
 
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              How it works
-            </h2>
-            <div className="text-left space-y-3 text-gray-600">
-              <div className="flex gap-3">
-                <span className="text-[#E87722] font-bold shrink-0">1.</span>
-                <p>
-                  A lead messages Henley on WhatsApp (simulated here as a chat)
-                </p>
+        {/* Hero */}
+        <div className="relative z-10 max-w-6xl mx-auto px-8 pt-16 pb-24">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left: copy */}
+            <div>
+              <div className="hero-badge pill-shimmer inline-flex items-center gap-2 border border-[#E87722]/20 rounded-full px-4 py-1.5 mb-6">
+                <div className="w-2 h-2 bg-[#E87722] rounded-full animate-pulse" />
+                <span className="text-xs text-[#E87722] font-medium">
+                  AI-Powered Lead Intake
+                </span>
               </div>
-              <div className="flex gap-3">
-                <span className="text-[#E87722] font-bold shrink-0">2.</span>
-                <p>
-                  The AI has a natural conversation to collect project details,
-                  budget, timeline, and more
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <span className="text-[#E87722] font-bold shrink-0">3.</span>
-                <p>
-                  It qualifies the lead against Henley&apos;s thresholds
-                  automatically
-                </p>
-              </div>
-              <div className="flex gap-3">
-                <span className="text-[#E87722] font-bold shrink-0">4.</span>
-                <p>
-                  A structured lead summary is generated, ready to push to
-                  HubSpot and Buildertrend
-                </p>
-              </div>
+
+              <h1 className="hero-title text-5xl font-bold leading-tight tracking-tight mb-6">
+                Every lead, qualified
+                <br />
+                <span className="text-[#E87722]">before you show up.</span>
+              </h1>
+
+              <p className="hero-desc text-lg text-gray-400 leading-relaxed mb-8 max-w-lg">
+                An AI assistant that talks to your leads on WhatsApp, collects
+                project details naturally, qualifies them against your
+                thresholds, and builds a briefing packet so your team walks onto
+                every site ready.
+              </p>
+
+              <button
+                onClick={startConversation}
+                className="hero-cta cta-glow group bg-[#E87722] hover:bg-[#d06a1e] text-white font-semibold py-4 px-8 rounded-xl text-base transition-all cursor-pointer hover:translate-y-[-1px]"
+              >
+                Try the Live Demo
+                <span className="inline-block ml-2 transition-transform group-hover:translate-x-1">
+                  &rarr;
+                </span>
+              </button>
+
+              <p className="hero-hint mt-4 text-sm text-gray-600">
+                Play the role of a lead. See how the AI handles it.
+              </p>
+            </div>
+
+            {/* Right: feature cards */}
+            <div className="space-y-4">
+              <FeatureCard
+                number="01"
+                title="Conversational Intake"
+                description="The AI chats naturally with leads over WhatsApp. No forms, no friction. It collects name, scope, budget, timeline, and more through casual conversation."
+                className="feature-card-1"
+              />
+              <FeatureCard
+                number="02"
+                title="Instant Qualification"
+                description="The moment the conversation ends, the system checks budget, location, project type, and timeline against Henley's thresholds. Qualified leads get a Calendly link immediately."
+                className="feature-card-2"
+              />
+              <FeatureCard
+                number="03"
+                title="Structured Data Output"
+                description="Every field lands in HubSpot and Buildertrend automatically. A briefing packet gets generated so the field team has full context before the site visit."
+                className="feature-card-3"
+              />
+              <FeatureCard
+                number="04"
+                title="Handles the Hard Stuff"
+                description={`"I don't know my budget" is the most common answer. The AI anchors with a realistic local range for their project type and gets a usable number without pressure.`}
+                className="feature-card-4"
+              />
             </div>
           </div>
 
-          <button
-            onClick={startConversation}
-            className="bg-[#E87722] hover:bg-[#d06a1e] text-white font-semibold py-4 px-8 rounded-xl text-lg transition-colors cursor-pointer shadow-md"
-          >
-            Start Demo Conversation
-          </button>
-
-          <p className="mt-4 text-sm text-gray-400">
-            Try being a lead. Say anything. See how the AI handles it.
-          </p>
+          {/* Bottom: tech stack pills */}
+          <div className="tech-stack mt-20 pt-10 border-t border-white/5">
+            <p className="text-xs text-gray-600 uppercase tracking-widest mb-4">
+              Built with
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {[
+                "Claude API (Anthropic)",
+                "WhatsApp Business API",
+                "Portkey",
+                "HubSpot CRM",
+                "Buildertrend",
+                "Calendly",
+                "Next.js",
+              ].map((tool) => (
+                <span
+                  key={tool}
+                  className="text-sm text-gray-400 bg-white/5 border border-white/10 rounded-lg px-4 py-2"
+                >
+                  {tool}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
+  // ─── Chat View ───
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-[#0f1117]">
       {/* Chat panel */}
       <div
-        className={`flex flex-col ${leadData ? "lg:w-3/5" : "w-full max-w-3xl mx-auto"} h-screen`}
+        className={`flex flex-col ${leadData ? "lg:w-3/5" : "w-full max-w-3xl mx-auto"} h-screen transition-all duration-500`}
       >
         {/* Chat header */}
         <div className="bg-[#075e54] text-white px-4 py-3 flex items-center gap-3 shadow-md">
@@ -235,7 +310,7 @@ export default function Home() {
             onClick={resetChat}
             className="text-xs bg-white/10 hover:bg-white/20 rounded-lg px-3 py-1.5 transition-colors cursor-pointer"
           >
-            Reset
+            Reset Demo
           </button>
         </div>
 
@@ -324,28 +399,23 @@ export default function Home() {
 
       {/* Lead summary panel */}
       {leadData && (
-        <div className="lg:w-2/5 bg-white border-l border-gray-200 h-screen overflow-y-auto summary-appear">
+        <div className="lg:w-2/5 bg-[#161922] border-l border-white/5 h-screen overflow-y-auto summary-appear">
           <div className="p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div
-                className={`w-3 h-3 rounded-full ${leadData.qualified ? "bg-green-500" : "bg-red-500"}`}
-              ></div>
-              <h2 className="text-xl font-bold text-gray-900">
-                Lead Summary
-              </h2>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-2">
+              <h2 className="text-xl font-bold text-white">Lead Summary</h2>
               <span
                 className={`ml-auto text-xs font-semibold px-3 py-1 rounded-full ${
                   leadData.qualified
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
+                    ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                    : "bg-red-500/10 text-red-400 border border-red-500/20"
                 }`}
               >
                 {leadData.qualified ? "QUALIFIED" : "NOT QUALIFIED"}
               </span>
             </div>
-
-            <p className="text-xs text-gray-400 mb-6">
-              This data would be pushed to HubSpot + Buildertrend automatically
+            <p className="text-xs text-gray-500 mb-6">
+              Auto-generated from conversation. Ready for HubSpot + Buildertrend.
             </p>
 
             <div className="space-y-4">
@@ -403,30 +473,84 @@ export default function Home() {
               </SummarySection>
 
               {leadData.disqualification_reason && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                  <p className="text-sm text-red-700">
+                <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
+                  <p className="text-sm text-red-400">
                     <span className="font-semibold">Reason: </span>
                     {leadData.disqualification_reason}
                   </p>
                 </div>
               )}
 
-              <div className="bg-[#FFF8F0] border border-[#E87722]/20 rounded-lg p-4">
-                <h3 className="font-semibold text-[#E87722] text-sm mb-2">
-                  What happens next in production
+              {/* Pipeline visualization */}
+              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+                <h3 className="font-semibold text-[#E87722] text-sm mb-4">
+                  Production Pipeline
                 </h3>
-                <ul className="text-xs text-gray-600 space-y-1.5">
-                  <li>1. This data gets pushed to HubSpot (contact + deal)</li>
-                  <li>2. Lead books via Calendly link sent in WhatsApp</li>
-                  <li>3. Briefing packet auto-generated and emailed to team</li>
-                  <li>4. Data synced to Buildertrend project record</li>
-                  <li>5. Team walks onto site with full context</li>
-                </ul>
+                <div className="space-y-3">
+                  <PipelineStep
+                    step="1"
+                    label="Push to HubSpot"
+                    detail="Contact + Deal created"
+                    done
+                  />
+                  <PipelineStep
+                    step="2"
+                    label="Calendly Link Sent"
+                    detail="Lead books on-site consultation"
+                    done
+                  />
+                  <PipelineStep
+                    step="3"
+                    label="Briefing Packet"
+                    detail="Auto-generated PDF emailed to team"
+                    done
+                  />
+                  <PipelineStep
+                    step="4"
+                    label="Buildertrend Sync"
+                    detail="Project record created with all data"
+                    done
+                  />
+                  <PipelineStep
+                    step="5"
+                    label="Walk Onto Site"
+                    detail="Team arrives with full context"
+                    active
+                  />
+                </div>
               </div>
             </div>
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ─── Components ───
+
+function FeatureCard({
+  number,
+  title,
+  description,
+  className = "",
+}: {
+  number: string;
+  title: string;
+  description: string;
+  className?: string;
+}) {
+  return (
+    <div className={`${className} group bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 hover:bg-white/[0.05] hover:border-[#E87722]/20 transition-all`}>
+      <div className="flex gap-4">
+        <span className="text-[#E87722]/40 text-sm font-mono font-bold mt-0.5">
+          {number}
+        </span>
+        <div>
+          <h3 className="font-semibold text-white text-base mb-1">{title}</h3>
+          <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
+        </div>
+      </div>
     </div>
   );
 }
@@ -439,11 +563,11 @@ function SummarySection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="border border-gray-100 rounded-lg p-4">
-      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
         {title}
       </h3>
-      <div className="space-y-2">{children}</div>
+      <div className="space-y-2.5">{children}</div>
     </div>
   );
 }
@@ -451,19 +575,63 @@ function SummarySection({
 function SummaryField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-gray-400">{label}</p>
-      <p className="text-sm text-gray-800">{value || "Not provided"}</p>
+      <p className="text-[11px] text-gray-600">{label}</p>
+      <p className="text-sm text-gray-200">{value || "Not provided"}</p>
     </div>
   );
 }
 
 function QualCheck({ label, passed }: { label: string; passed: boolean }) {
   return (
-    <div className="flex items-center gap-2">
-      <span className={`text-sm ${passed ? "text-green-500" : "text-red-500"}`}>
-        {passed ? "Pass" : "Fail"}
-      </span>
-      <span className="text-sm text-gray-700">{label}</span>
+    <div className="flex items-center gap-2.5">
+      <div
+        className={`w-5 h-5 rounded-full flex items-center justify-center text-xs ${
+          passed
+            ? "bg-green-500/10 text-green-400"
+            : "bg-red-500/10 text-red-400"
+        }`}
+      >
+        {passed ? "\u2713" : "\u2717"}
+      </div>
+      <span className="text-sm text-gray-300">{label}</span>
+    </div>
+  );
+}
+
+function PipelineStep({
+  step,
+  label,
+  detail,
+  done,
+  active,
+}: {
+  step: string;
+  label: string;
+  detail: string;
+  done?: boolean;
+  active?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-3">
+      <div
+        className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+          active
+            ? "bg-[#E87722] text-white"
+            : done
+              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+              : "bg-white/5 text-gray-600 border border-white/10"
+        }`}
+      >
+        {done && !active ? "\u2713" : step}
+      </div>
+      <div>
+        <p
+          className={`text-sm font-medium ${active ? "text-[#E87722]" : "text-gray-300"}`}
+        >
+          {label}
+        </p>
+        <p className="text-xs text-gray-600">{detail}</p>
+      </div>
     </div>
   );
 }

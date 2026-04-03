@@ -10,6 +10,110 @@ body {
   font-family: 'Inter', sans-serif;
 }
 
+/* ─── Landing Page Animations ─── */
+
+/* Hero text stagger */
+@keyframes heroFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-badge { animation: heroFadeUp 0.6s ease-out 0.1s both; }
+.hero-title { animation: heroFadeUp 0.6s ease-out 0.25s both; }
+.hero-desc { animation: heroFadeUp 0.6s ease-out 0.4s both; }
+.hero-cta { animation: heroFadeUp 0.6s ease-out 0.55s both; }
+.hero-hint { animation: heroFadeUp 0.6s ease-out 0.65s both; }
+
+/* Feature cards stagger */
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.feature-card-1 { animation: cardSlideIn 0.5s ease-out 0.3s both; }
+.feature-card-2 { animation: cardSlideIn 0.5s ease-out 0.45s both; }
+.feature-card-3 { animation: cardSlideIn 0.5s ease-out 0.6s both; }
+.feature-card-4 { animation: cardSlideIn 0.5s ease-out 0.75s both; }
+
+/* Tech stack fade in */
+@keyframes stackFade {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tech-stack { animation: stackFade 0.5s ease-out 0.9s both; }
+
+/* Floating gradient orbs */
+@keyframes floatOrb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-15px, 15px) scale(0.95); }
+}
+
+@keyframes floatOrb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-20px, 25px) scale(0.95); }
+  66% { transform: translate(25px, -10px) scale(1.05); }
+}
+
+.orb-1 { animation: floatOrb1 8s ease-in-out infinite; }
+.orb-2 { animation: floatOrb2 10s ease-in-out infinite; }
+
+/* Pulsing glow behind CTA */
+@keyframes ctaGlow {
+  0%, 100% { box-shadow: 0 0 20px rgba(232, 119, 34, 0.2); }
+  50% { box-shadow: 0 0 40px rgba(232, 119, 34, 0.35); }
+}
+
+.cta-glow {
+  animation: ctaGlow 2.5s ease-in-out infinite;
+}
+
+/* Pill shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.pill-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(232, 119, 34, 0.1) 0%,
+    rgba(232, 119, 34, 0.2) 50%,
+    rgba(232, 119, 34, 0.1) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+/* Nav fade in */
+@keyframes navFade {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-animate { animation: navFade 0.4s ease-out both; }
+
+/* ─── Chat Bubbles ─── */
+
 .bubble-lead {
   background: white;
   border-radius: 0 8px 8px 8px;
@@ -22,6 +126,7 @@ body {
   position: relative;
 }
 
+/* Typing indicator */
 .typing-dot {
   animation: typingBounce 1.4s infinite ease-in-out;
 }
@@ -35,43 +140,25 @@ body {
   30% { transform: translateY(-4px); }
 }
 
-.chat-scroll::-webkit-scrollbar {
-  width: 6px;
-}
+/* Scrollbar */
+.chat-scroll::-webkit-scrollbar { width: 6px; }
+.chat-scroll::-webkit-scrollbar-track { background: transparent; }
+.chat-scroll::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
 
-.chat-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.chat-scroll::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 3px;
-}
-
+/* Message appear */
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .message-appear {
   animation: fadeInUp 0.3s ease-out;
 }
 
+/* Summary panel slide in */
 @keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
 }
 
 .summary-appear {

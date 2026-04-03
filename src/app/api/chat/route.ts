@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { HENLEY_SYSTEM_PROMPT } from "@/lib/system-prompt";
 
 const anthropic = new Anthropic({
@@ -10,8 +10,8 @@ export async function POST(req: NextRequest) {
   try {
     const { messages } = await req.json();
 
-    const response = await anthropic.messages.create({
-      model: "claude-sonnet-4-20250514",
+    const stream = await anthropic.messages.stream({
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 1024,
       system: HENLEY_SYSTEM_PROMPT,
       messages: messages.map((msg: { role: string; content: string }) => ({
@@ -20,32 +20,62 @@ export async function POST(req: NextRequest) {
       })),
     });
 
-    const textContent = response.content.find((block) => block.type === "text");
-    const text = textContent ? textContent.text : "";
+    const encoder = new TextEncoder();
 
-    // Check if the conversation is complete by looking for the JSON block
-    let leadData = null;
-    let displayText = text;
+    const readable = new ReadableStream({
+      async start(controller) {
+        let fullText = "";
 
-    const jsonMatch = text.match(/```json:lead_data\n([\s\S]*?)```/);
-    if (jsonMatch) {
-      try {
-        leadData = JSON.parse(jsonMatch[1]);
-        displayText = text.replace(/```json:lead_data\n[\s\S]*?```/, "").trim();
-      } catch {
-        // JSON parse failed, just show the full text
-      }
-    }
+        for await (const event of stream) {
+          if (
+            event.type === "content_block_delta" &&
+            event.delta.type === "text_delta"
+          ) {
+            fullText += event.delta.text;
+            controller.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({ type: "delta", text: event.delta.text })}\n\n`
+              )
+            );
+          }
+        }
 
-    return NextResponse.json({
-      message: displayText,
-      leadData,
+        // Check for lead data JSON at the end
+        let leadData = null;
+        let displayText = fullText;
+        const jsonMatch = fullText.match(/```json:lead_data\n([\s\S]*?)```/);
+        if (jsonMatch) {
+          try {
+            leadData = JSON.parse(jsonMatch[1]);
+            displayText = fullText
+              .replace(/```json:lead_data\n[\s\S]*?```/, "")
+              .trim();
+          } catch {
+            // JSON parse failed
+          }
+        }
+
+        controller.enqueue(
+          encoder.encode(
+            `data: ${JSON.stringify({ type: "done", leadData, displayText })}\n\n`
+          )
+        );
+        controller.close();
+      },
+    });
+
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
     });
   } catch (error) {
     console.error("Chat API error:", error);
-    return NextResponse.json(
-      { error: "Failed to process message" },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Failed to process message" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
