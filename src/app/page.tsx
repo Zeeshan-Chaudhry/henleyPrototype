@@ -420,8 +420,8 @@ export default function Home() {
     return (
       <div className="min-h-screen bg-white text-gray-900 overflow-hidden relative">
         {/* Floating gradient orbs */}
-        <div className="orb-1 absolute top-[-200px] left-[-100px] w-[500px] h-[500px] bg-[#CAab06]/10 rounded-full blur-[120px]" />
-        <div className="orb-2 absolute bottom-[-200px] right-[-100px] w-[400px] h-[400px] bg-[#CAab06]/5 rounded-full blur-[100px]" />
+        <div className="orb-1 absolute top-[-200px] left-[-100px] w-[500px] h-[500px] bg-[#1a1a1a]/10 rounded-full blur-[120px]" />
+        <div className="orb-2 absolute bottom-[-200px] right-[-100px] w-[400px] h-[400px] bg-[#1a1a1a]/5 rounded-full blur-[100px]" />
 
         {/* Nav */}
         <nav className="nav-animate relative z-10 flex items-center justify-between px-6 sm:px-8 py-6 max-w-6xl mx-auto">
@@ -441,9 +441,9 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: copy */}
             <div>
-              <div className="hero-badge inline-flex items-center gap-2 bg-[#CAab06]/10 border border-[#CAab06]/20 rounded-full px-4 py-1.5 mb-6">
-                <div className="w-2 h-2 bg-[#CAab06] rounded-full animate-pulse" />
-                <span className="text-xs text-[#CAab06] font-medium">
+              <div className="hero-badge inline-flex items-center gap-2 bg-[#1a1a1a]/10 border border-[#1a1a1a]/20 rounded-full px-4 py-1.5 mb-6">
+                <div className="w-2 h-2 bg-[#1a1a1a] rounded-full animate-pulse" />
+                <span className="text-xs text-[#1a1a1a] font-medium">
                   AI-Powered Lead Intake
                 </span>
               </div>
@@ -451,7 +451,7 @@ export default function Home() {
               <h1 className="hero-title text-4xl sm:text-5xl font-bold leading-tight tracking-tight mb-6 text-gray-900">
                 Every lead, qualified
                 <br />
-                <span className="text-[#CAab06]">before you show up.</span>
+                <span className="text-[#1a1a1a]">before you show up.</span>
               </h1>
 
               <p className="hero-desc text-base sm:text-lg text-gray-500 leading-relaxed mb-4 max-w-lg">
@@ -743,7 +743,7 @@ export default function Home() {
 
               {/* Pipeline visualization */}
               <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
-                <h3 className="font-semibold text-[#CAab06] text-sm mb-4">
+                <h3 className="font-semibold text-[#1a1a1a] text-sm mb-4">
                   Production Pipeline
                 </h3>
                 <div className="space-y-3">
@@ -808,10 +808,10 @@ function FeatureCard({
 }) {
   return (
     <div
-      className={`${className} group bg-gray-50 border border-gray-200 rounded-xl p-5 hover:bg-gray-100 hover:border-[#CAab06]/30 transition-all`}
+      className={`${className} group bg-gray-50 border border-gray-200 rounded-xl p-5 hover:bg-gray-100 hover:border-[#1a1a1a]/30 transition-all`}
     >
       <div className="flex gap-4">
-        <span className="text-[#CAab06] text-sm font-mono font-bold mt-0.5">
+        <span className="text-[#1a1a1a] text-sm font-mono font-bold mt-0.5">
           {number}
         </span>
         <div>
@@ -884,7 +884,7 @@ function PipelineStep({
       <div
         className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
           active
-            ? "bg-[#CAab06] text-white"
+            ? "bg-[#1a1a1a] text-white"
             : done
               ? "bg-green-500/10 text-green-400 border border-green-500/20"
               : "bg-gray-100 text-gray-400 border border-gray-200"
@@ -894,7 +894,7 @@ function PipelineStep({
       </div>
       <div>
         <p
-          className={`text-sm font-medium ${active ? "text-[#CAab06]" : "text-gray-700"}`}
+          className={`text-sm font-medium ${active ? "text-[#1a1a1a]" : "text-gray-700"}`}
         >
           {label}
         </p>
