@@ -418,20 +418,20 @@ export default function Home() {
   // ─── Landing Page ───
   if (!started) {
     return (
-      <div className="min-h-screen bg-[#0f1117] text-white overflow-hidden relative">
+      <div className="min-h-screen bg-white text-gray-900 overflow-hidden relative">
         {/* Floating gradient orbs */}
-        <div className="orb-1 absolute top-[-200px] left-[-100px] w-[500px] h-[500px] bg-[#CAab06]/20 rounded-full blur-[120px]" />
-        <div className="orb-2 absolute bottom-[-200px] right-[-100px] w-[400px] h-[400px] bg-[#CAab06]/10 rounded-full blur-[100px]" />
+        <div className="orb-1 absolute top-[-200px] left-[-100px] w-[500px] h-[500px] bg-[#CAab06]/10 rounded-full blur-[120px]" />
+        <div className="orb-2 absolute bottom-[-200px] right-[-100px] w-[400px] h-[400px] bg-[#CAab06]/5 rounded-full blur-[100px]" />
 
         {/* Nav */}
         <nav className="nav-animate relative z-10 flex items-center justify-between px-6 sm:px-8 py-6 max-w-6xl mx-auto">
           <div className="flex items-center gap-3">
-            <Image src="/henley-logo.svg" alt="Henley" width={36} height={36} className="invert" />
-            <span className="font-semibold text-lg tracking-tight">
+            <Image src="/henley-logo.svg" alt="Henley" width={36} height={36} />
+            <span className="font-semibold text-lg tracking-tight text-gray-900">
               Henley Contracting
             </span>
           </div>
-          <span className="text-xs text-gray-500 bg-white/5 border border-white/10 rounded-full px-3 py-1 hidden sm:inline">
+          <span className="text-xs text-gray-500 bg-gray-100 border border-gray-200 rounded-full px-3 py-1 hidden sm:inline">
             Prototype Demo
           </span>
         </nav>
@@ -441,27 +441,27 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left: copy */}
             <div>
-              <div className="hero-badge pill-shimmer inline-flex items-center gap-2 border border-[#CAab06]/20 rounded-full px-4 py-1.5 mb-6">
+              <div className="hero-badge inline-flex items-center gap-2 bg-[#CAab06]/10 border border-[#CAab06]/20 rounded-full px-4 py-1.5 mb-6">
                 <div className="w-2 h-2 bg-[#CAab06] rounded-full animate-pulse" />
                 <span className="text-xs text-[#CAab06] font-medium">
                   AI-Powered Lead Intake
                 </span>
               </div>
 
-              <h1 className="hero-title text-4xl sm:text-5xl font-bold leading-tight tracking-tight mb-6">
+              <h1 className="hero-title text-4xl sm:text-5xl font-bold leading-tight tracking-tight mb-6 text-gray-900">
                 Every lead, qualified
                 <br />
                 <span className="text-[#CAab06]">before you show up.</span>
               </h1>
 
-              <p className="hero-desc text-base sm:text-lg text-gray-400 leading-relaxed mb-4 max-w-lg">
+              <p className="hero-desc text-base sm:text-lg text-gray-500 leading-relaxed mb-4 max-w-lg">
                 Closing the gap between Step 1.1 and Step 1.2. By the time your
                 team walks onto a site, they already have the scope, budget,
                 timeline, and a pre-filled Client Intake Form. No repeated
                 questions.
               </p>
 
-              <p className="hero-desc text-sm text-gray-600 mb-8 max-w-lg">
+              <p className="hero-desc text-sm text-gray-400 mb-8 max-w-lg">
                 The AI handles lead intake over WhatsApp, qualifies against your
                 thresholds, books the consultation via Calendly, and syncs
                 everything to HubSpot and Buildertrend automatically.
@@ -470,7 +470,7 @@ export default function Home() {
               <div className="hero-cta flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={startConversation}
-                  className="cta-glow group bg-[#CAab06] hover:bg-[#b89a05] text-white font-semibold py-4 px-8 rounded-xl text-base transition-all cursor-pointer hover:translate-y-[-1px]"
+                  className="group bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-8 rounded-xl text-base transition-all cursor-pointer hover:translate-y-[-1px] shadow-lg"
                 >
                   Try It Yourself
                   <span className="inline-block ml-2 transition-transform group-hover:translate-x-1">
@@ -479,14 +479,14 @@ export default function Home() {
                 </button>
                 <button
                   onClick={runAutoPlay}
-                  className="group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-gray-300 font-semibold py-4 px-8 rounded-xl text-base transition-all cursor-pointer"
+                  className="group bg-gray-50 hover:bg-gray-100 border border-gray-200 hover:border-gray-300 text-gray-700 font-semibold py-4 px-8 rounded-xl text-base transition-all cursor-pointer"
                 >
                   <span className="mr-2">&#9654;</span>
                   Watch a Demo
                 </button>
               </div>
 
-              <p className="hero-hint mt-4 text-sm text-gray-600">
+              <p className="hero-hint mt-4 text-sm text-gray-400">
                 &ldquo;Try It Yourself&rdquo; uses live AI. &ldquo;Watch a
                 Demo&rdquo; plays a pre-recorded conversation.
               </p>
@@ -530,7 +530,7 @@ export default function Home() {
   const showSummaryButton = !leadData && !isLoading && !isAutoPlay && messageCount >= 10;
 
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-[#0f1117]">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
       {/* Chat panel */}
       <div
         className={`flex flex-col ${leadData ? "lg:w-3/5" : "w-full max-w-3xl mx-auto"} h-screen transition-all duration-500`}
@@ -659,10 +659,10 @@ export default function Home() {
 
       {/* Lead summary panel */}
       {leadData && (
-        <div className="lg:w-2/5 bg-[#161922] border-l border-white/5 h-screen overflow-y-auto summary-appear">
+        <div className="lg:w-2/5 bg-white border-l border-gray-200 h-screen overflow-y-auto summary-appear">
           <div className="p-6">
             <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-xl font-bold text-white">Lead Summary</h2>
+              <h2 className="text-xl font-bold text-gray-900">Lead Summary</h2>
               <span
                 className={`ml-auto text-xs font-semibold px-3 py-1 rounded-full ${
                   leadData.qualified
@@ -733,8 +733,8 @@ export default function Home() {
               </SummarySection>
 
               {leadData.disqualification_reason && (
-                <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
-                  <p className="text-sm text-red-400">
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <p className="text-sm text-red-600">
                     <span className="font-semibold">Reason: </span>
                     {leadData.disqualification_reason}
                   </p>
@@ -742,7 +742,7 @@ export default function Home() {
               )}
 
               {/* Pipeline visualization */}
-              <div className="bg-white/5 border border-white/10 rounded-xl p-5">
+              <div className="bg-gray-50 border border-gray-200 rounded-xl p-5">
                 <h3 className="font-semibold text-[#CAab06] text-sm mb-4">
                   Production Pipeline
                 </h3>
@@ -808,14 +808,14 @@ function FeatureCard({
 }) {
   return (
     <div
-      className={`${className} group bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 hover:bg-white/[0.05] hover:border-[#CAab06]/20 transition-all`}
+      className={`${className} group bg-gray-50 border border-gray-200 rounded-xl p-5 hover:bg-gray-100 hover:border-[#CAab06]/30 transition-all`}
     >
       <div className="flex gap-4">
-        <span className="text-[#CAab06]/40 text-sm font-mono font-bold mt-0.5">
+        <span className="text-[#CAab06] text-sm font-mono font-bold mt-0.5">
           {number}
         </span>
         <div>
-          <h3 className="font-semibold text-white text-base mb-1">{title}</h3>
+          <h3 className="font-semibold text-gray-900 text-base mb-1">{title}</h3>
           <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
         </div>
       </div>
@@ -831,8 +831,8 @@ function SummarySection({
   children: React.ReactNode;
 }) {
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4">
-      <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">
+    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+      <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-3">
         {title}
       </h3>
       <div className="space-y-2.5">{children}</div>
@@ -843,8 +843,8 @@ function SummarySection({
 function SummaryField({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] text-gray-600">{label}</p>
-      <p className="text-sm text-gray-200">{value || "Not provided"}</p>
+      <p className="text-[11px] text-gray-400">{label}</p>
+      <p className="text-sm text-gray-800">{value || "Not provided"}</p>
     </div>
   );
 }
@@ -861,7 +861,7 @@ function QualCheck({ label, passed }: { label: string; passed: boolean }) {
       >
         {passed ? "\u2713" : "\u2717"}
       </div>
-      <span className="text-sm text-gray-300">{label}</span>
+      <span className="text-sm text-gray-700">{label}</span>
     </div>
   );
 }
@@ -887,14 +887,14 @@ function PipelineStep({
             ? "bg-[#CAab06] text-white"
             : done
               ? "bg-green-500/10 text-green-400 border border-green-500/20"
-              : "bg-white/5 text-gray-600 border border-white/10"
+              : "bg-gray-100 text-gray-400 border border-gray-200"
         }`}
       >
         {done && !active ? "\u2713" : step}
       </div>
       <div>
         <p
-          className={`text-sm font-medium ${active ? "text-[#CAab06]" : "text-gray-300"}`}
+          className={`text-sm font-medium ${active ? "text-[#CAab06]" : "text-gray-700"}`}
         >
           {label}
         </p>

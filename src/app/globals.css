@@ -79,8 +79,8 @@ body {
 
 /* Pulsing glow behind CTA */
 @keyframes ctaGlow {
-  0%, 100% { box-shadow: 0 0 20px rgba(232, 119, 34, 0.2); }
-  50% { box-shadow: 0 0 40px rgba(232, 119, 34, 0.35); }
+  0%, 100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); }
+  50% { box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15); }
 }
 
 .cta-glow {
